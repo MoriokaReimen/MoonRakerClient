@@ -31,6 +31,11 @@ public:
   short right_front_RPM{0};
   short right_rear{0};
   short max_rpm_{4000};
+  bool toByteArray(char* bytes)
+  {
+    return true;
+    return false;
+  }
 };
 
 class MoonRakerClient
