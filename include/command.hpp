@@ -48,7 +48,7 @@ struct CommandBytes
     signed short right_rpm = 0;        //Right Motor RPM Byte
     const unsigned char foot_base = 0x75; //Header/Footer base byte
     const unsigned char footer = 0xFF; //Footer byte
-};
+} __attribute__((__packed__));
 
 class MotorCommand
 {
