@@ -1,6 +1,6 @@
 /*!
 -----------------------------------------------------------------------------
-@file    main.cpp
+@file    motor.hpp
 ----------------------------------------------------------------------------
          @@
        @@@@@@
@@ -30,21 +30,25 @@
           %%%%%
            %%%
 -----------------------------------------------------------------------------
-@brief main function of rover side application
+@brief motor serial communication manipulation class
 -----------------------------------------------------------------------------
 */
-#include "moonserver.hpp"
-
-int main ()
+#pragma once
+#include "rs232.hpp"
+#include "command.hpp"
+#include "data.hpp"
+#include <stdexcept>
+using std::runtime_error;
+using bit8 = unsigned char;
+/*! @class Motor
+ *  @brief handles serial communication between motor
+ *
+*/
+class Motor
 {
-    const string rover_address {
-        ""
-    };
-    const string console_address {
-        ""
-    };
-    MoonServer server(rover_address, console_address);
-    server.run();
-
-    return 0;
-}
+public:
+    Motor();
+    ~Motor();
+    int sendCommand(const MotorCommand& command) const;
+    MotorData getData() const;
+};

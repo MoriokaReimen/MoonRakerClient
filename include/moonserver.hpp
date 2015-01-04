@@ -1,6 +1,6 @@
 /*!
 -----------------------------------------------------------------------------
-@file    main.cpp
+@file    moonserver.hpp
 ----------------------------------------------------------------------------
          @@
        @@@@@@
@@ -17,7 +17,7 @@
    @### ``@@@@@@@@
    ###  ` @@@@@@@
   ###  @  @@@@@                 Creation Date:
- ###    @@@@@               @date Jan. 1. 2015
+ ###    @@@@@               @date Jan. 3. 2014
  /-\     @@
 |   |      %%                      Authors:
  \-/##    %%%%%             @author Kei Nakata
@@ -30,21 +30,26 @@
           %%%%%
            %%%
 -----------------------------------------------------------------------------
-@brief main function of rover side application
+@brief moonraker server main class
 -----------------------------------------------------------------------------
 */
-#include "moonserver.hpp"
+#pragma once
+#include <chrono>
+#include "motor.hpp"
+#include "zmqserver.hpp"
+using std::string;
 
-int main ()
+/*!
+ * @class MoonServer
+ * @brief handle rover main routine
+*/
+class MoonServer
 {
-    const string rover_address {
-        ""
-    };
-    const string console_address {
-        ""
-    };
-    MoonServer server(rover_address, console_address);
-    server.run();
-
-    return 0;
-}
+    ZMQServer zmq_; //! zmq handling class
+    Motor motor_; //! serial communication for motor handling class
+    void doRoutine();
+public:
+    MoonServer(const string& rover_address, const string& console_address);
+    void run();
+    void run(double seconds);
+};

@@ -1,6 +1,6 @@
 /*!
 -----------------------------------------------------------------------------
-@file    main.cpp
+@file    zmqserver.hpp
 ----------------------------------------------------------------------------
          @@
        @@@@@@
@@ -17,7 +17,7 @@
    @### ``@@@@@@@@
    ###  ` @@@@@@@
   ###  @  @@@@@                 Creation Date:
- ###    @@@@@               @date Jan. 1. 2015
+ ###    @@@@@               @date Dec. 29. 2014
  /-\     @@
 |   |      %%                      Authors:
  \-/##    %%%%%             @author Kei Nakata
@@ -30,21 +30,37 @@
           %%%%%
            %%%
 -----------------------------------------------------------------------------
-@brief main function of rover side application
+@brief zmq manipulation class for moonraker server
 -----------------------------------------------------------------------------
 */
-#include "moonserver.hpp"
+#pragma once
+#include <cstdint>
+#include <cstdlib>
+#include <zmqpp/zmqpp.hpp>
+#include <string>
 
-int main ()
+#include "command.hpp"
+#include "data.hpp"
+#include "zmqdata.hpp"
+using std::string;
+
+/*!
+ * @class ZMQServer
+ * @brief wrapper class for zmq manupulation
+*/
+class ZMQServer
 {
-    const string rover_address {
-        ""
-    };
-    const string console_address {
-        ""
-    };
-    MoonServer server(rover_address, console_address);
-    server.run();
+    /*! private variables for sending data */
+    zmqpp::context publish_context_; //! zmq socket context
+    zmqpp::socket_type publish_type_ {zmqpp::socket_type::push}; //! zmq socket type
+    zmqpp::socket publish_socket_; //! zmq socket
 
-    return 0;
-}
+    /*! private variables for receiving command */
+    zmqpp::context subscribe_context_; //! zmq socket context
+    zmqpp::socket_type subscribe_type_ {zmqpp::socket_type::pull}; //! zmq socket type
+    zmqpp::socket subscribe_socket_; //! zmq socket
+public:
+    ZMQServer(const string& data_address, const string& command_address);
+    MotorCommand getCommand();
+    void sendData(const ZMQData& data);
+};
