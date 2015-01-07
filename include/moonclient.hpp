@@ -1,6 +1,6 @@
 /*!
 -----------------------------------------------------------------------------
-@file    main.cpp
+@file    moonclient.hpp
 ----------------------------------------------------------------------------
          @@
        @@@@@@
@@ -17,7 +17,7 @@
    @### ``@@@@@@@@
    ###  ` @@@@@@@
   ###  @  @@@@@                 Creation Date:
- ###    @@@@@               @date Jan. 1. 2015
+ ###    @@@@@               @date Jan. 7. 2014
  /-\     @@
 |   |      %%                      Authors:
  \-/##    %%%%%             @author Kei Nakata
@@ -30,31 +30,34 @@
           %%%%%
            %%%
 -----------------------------------------------------------------------------
-@brief main function of rover side application
+@brief console side command/data manipulation class
 -----------------------------------------------------------------------------
 */
-#include "moonclient.hpp"
+#pragma once
+#include <thread>
+#include <mutex>
+#include <string>
+#include "zmqclient.hpp"
+#include "motor.hpp"
+#include "command.hpp"
 using std::string;
-using std::cout;
-using std::endl;
 
-int main ()
+/*!
+ * @class MoonClient
+ * @brief console side command/data manipulation class
+*/
+class MoonClient
 {
-    const string command_address {
-        ""
-    };
-    const string data_address {
-        ""
-    };
-    MoonClient client(command_address, data_address);
-    ZMQData data;
-    MotorCommand command(0, 0);
-    while(true)
-    {
-      client.sendCommand(command);
-      data = client.getData();
-      cout << data.time << "," << endl;
-    }
-
-    return 0;
-}
+  ZMQClient zmq_;
+  MotorCommand command_;
+  ZMQData data_;
+  std::mutex command_mtx_;
+  std::mutex data_mtx_;
+  std::thread worker_;
+  void thredFunc();
+public:
+  MoonClient(const string& data_address, const string& command_address);
+  ~MoonClient();
+  void sendCommand(const MotorCommand& command);
+  ZMQData getData();
+};

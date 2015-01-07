@@ -30,94 +30,90 @@
           %%%%%
            %%%
 -----------------------------------------------------------------------------
-@brief published/subscribe contents manipulation class
+@brief console side command/data manipulation class
 -----------------------------------------------------------------------------
 */
-#include "zmqclient.hpp"
+#include "moonclient.hpp"
 using std::string;
 
-class MoonClient
+/*!
+ * @brief Constructor of MoonClient class
+ * @param[in] address of rover data socket
+ * @param[in] address of rover command socket
+*/
+MoonClient::MoonClient(const string& data_address, const string& command_address) :
+  zmq_(data_address, command_address), worker_(&MoonClient::thredFunc, this)
 {
-  ZMQClient zmq_;
-  short command_left_rpm;
-  short command_right_rpm;
-  double time;
-  short left_rear_rpm;
-  short left_front_rpm;
-  short right_rear_rpm;
-  short right_front_rpm;
-public:
-  MoonClient(cosnt string& data_address, const string& command_address) :
-    zmq_(data_address, command_address)
-  {
-  }
+}
 
-  ~MoonClient()
-  {
-  }
-  void thredFunc()
+
+/*!
+ * @brief Destructor of MoonClient class
+*/
+MoonClient::~MoonClient()
+{
+  if(this->worker_.joinable()) this->worker_.join();
+}
+
+/*!
+ * @brief routine done by other thread
+*/
+void MoonClient::thredFunc()
+{
+  MotorCommand old_command;
+  ZMQData data;
+
+  while(true)
   {
     /* send Command */
-
+    {
+      std::unique_lock<std::mutex> command_lock(this->command_mtx_, std::defer_lock);
+      if(command_lock.try_lock())
+      {
+        old_command = this-> command_;
+        this->zmq_.sendCommand(this->command_);
+      }
+      else this->zmq_.sendCommand(old_command);
+    }
+    /* getData Command */
+    {
+      std::unique_lock<std::mutex> data_lock(this->command_mtx_);
+      this->data_ = zmq_.getData();
+    }
   }
-  sendCommand();
-  getData();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*!
- * @brief Constructor for ZMQClient class
- * @param[in] address to publish data like ""
- * @param[in] address to subscribe command like ""
-*/
-ZMQClient::ZMQClient(const string& data_address, const string& command_address) :
-    publish_socket_(publish_context_, publish_type_), subscribe_socket_(subscribe_context_, subscribe_type_)
-{
-    /* Initialize socket for receiving data */
-    this -> subscribe_socket_.connect(data_address);
-
-    /* Initialize socket for publishing motor command */
-    this -> publish_socket_.connect(command_address);
-
-    return;
+  return;
 }
 
 /*!
- * @brief publish command through zmq socket.
- * @param[in] motor command
+ * @brief send command to rover
+ * @param[in] command
+ * @return Data from rover
 */
-void ZMQClient::sendCommand(const MotorCommand& command)
+void MoonClient::sendCommand(const MotorCommand& command)
 {
-    CommandBytes  bytes = command.toByteArray();
-    zmqpp::message message;
-    message.add_raw(&bytes, sizeof(bytes));
-    this->publish_socket_.send(message);
-    return;
-
+  std::unique_lock<std::mutex> lock(this->command_mtx_);
+  this->command_ = command;
+  return;
 }
 
 /*!
- * @brief subscribe rover data through zmq socket
- * @return Motor command
+ * @brief get Data from rover
+ * @return Data from rover
 */
-ZMQData ZMQClient::getData()
+ZMQData MoonClient::getData()
 {
-    ZMQBytes bytes;
-    zmqpp::message message;
-    this->subscribe_socket_.receive(message);
-    memcpy(&bytes, message.raw_data(0), sizeof(bytes));
-    return ZMQData(bytes);
+  static ZMQData old_data;
+  ZMQData data;
+  std::unique_lock<std::mutex> lock(this->data_mtx_, std::defer_lock);
+  if(lock.try_lock())
+  {
+    old_data = this-> data_;
+    data = this-> data_;
+  }
+  else
+  {
+    data = old_data;
+  }
+
+  return data;
 }
