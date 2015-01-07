@@ -34,6 +34,7 @@
 -----------------------------------------------------------------------------
 */
 #include "moonclient.hpp"
+#include <ncurses.h>
 using std::string;
 using std::cout;
 using std::endl;
@@ -51,9 +52,22 @@ int main ()
     MotorCommand command(0, 0);
     while(true)
     {
+      auto input = getch();
+      if(input == 'q') break;
+      if(input == 'k') command.set(3000, 3000);
+      if(input == 'k') command.set(0, 0);
       client.sendCommand(command);
       data = client.getData();
-      cout << data.time << "," << endl;
+      cout << data.time << ",";
+      cout << data.left_rear_rpm << ",";
+      cout << data.left_front_rpm << ",";
+      cout << data.right_rear_rpm << ",";
+      cout << data.right_front_rpm << ",";
+      cout << data.left_rear_current << ",";
+      cout << data.left_front_current << ",";
+      cout << data.right_rear_current << ",";
+      cout << data.right_front_current << ",";
+      cout << data.battery_v << endl;
     }
 
     return 0;
