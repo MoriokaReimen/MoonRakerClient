@@ -42,10 +42,10 @@ using std::endl;
 int main ()
 {
     const string command_address {
-        ""
+        "tcp://192.168.11.99:5555"
     };
     const string data_address {
-        ""
+        "tcp://192.168.11.99:5556"
     };
     MoonClient client(command_address, data_address);
     ZMQData data;
@@ -55,7 +55,7 @@ int main ()
       auto input = getch();
       if(input == 'q') break;
       if(input == 'k') command.set(3000, 3000);
-      if(input == 'k') command.set(0, 0);
+      if(input == 'j') command.set(0, 0);
       client.sendCommand(command);
       data = client.getData();
       cout << data.time << ",";

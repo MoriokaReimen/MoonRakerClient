@@ -86,7 +86,7 @@ struct ZMQBytes {
 class ZMQData
 {
 public:
-    double time = 0;         //! Time stamp Byte
+    int64_t time = 0;         //! Time stamp Byte
     int left_rear_rpm = 0; //! rear Motor RPM
     int left_front_rpm = 0; //! front Motor RPM
     int right_rear_rpm = 0; //! rear Motor RPM
