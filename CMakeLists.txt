@@ -14,5 +14,5 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
 
 add_library(moon_client STATIC src/rs232.cpp src/command.cpp src/data.cpp src/motor.cpp src/zmqdata.cpp src/zmqserver.cpp src/zmqclient.cpp src/moonserver.cpp src/moonclient.cpp)
 
-add_executable(SimpleConsole src/main.cpp src/rs232.cpp src/command.cpp src/data.cpp src/motor.cpp src/zmqdata.cpp src/zmqserver.cpp src/zmqclient.cpp src/moonserver.cpp src/moonclient.cpp)
-target_link_libraries(SimpleConsole pthread ncurses zmq zmqpp)
+add_executable(SimpleConsole src/main.cpp src/rs232.cpp src/command.cpp src/data.cpp src/motor.cpp src/zmqdata.cpp src/zmqserver.cpp src/zmqclient.cpp src/moonserver.cpp src/moonclient.cpp src/gamepad.c)
+target_link_libraries(SimpleConsole pthread ncurses zmq zmqpp udev curses c m)
